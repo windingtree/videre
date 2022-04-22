@@ -10,8 +10,6 @@ package videre.stays;
 message Ping {
   // timestamp when this ping was sent
   uint64 timestamp = 1;
-  // signature of a bidding signer for the facility, verifiable on-chain
-  bytes signature = 2;
 }
 
 message Pong {

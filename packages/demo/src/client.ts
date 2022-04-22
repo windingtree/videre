@@ -3,12 +3,13 @@ import { PrivateMessage, PublicKeyMessage } from "./proto/chat_message";
 
 import { StaysFacility, StaysFacility__factory } from "../typechain"
 
-import { ethers, providers, utils, Wallet } from "ethers";
+import { BigNumber, ethers, providers, utils, Wallet } from "ethers";
 import { equals } from "uint8arrays/equals";
 import { TypedDataDomain } from "@ethersproject/abstract-signer";
 
 import 'dotenv/config'
 import { Ping, Pong, Bid, Ask } from "./proto/stays";
+import { EIP712PongTypes } from "./utils/EIP712Types";
 
 /**
  * Videre Engine - To see the market 🌳🦉.
@@ -24,6 +25,9 @@ const keyIndex = process.env.CLIENT_KEY_INDEX ? process.env.CLIENT_KEY_INDEX : 0
 const provider = new providers.JsonRpcProvider(process.env.RPC_URL)
 const wallet = ethers.Wallet.fromMnemonic(
   process.env.MNEMONIC ? process.env.MNEMONIC : "", `m/44'/60'/0'/0/${keyIndex}`).connect(provider)
+
+const registry: StaysFacility = StaysFacility__factory.connect('0x29b67856f9ca63df5e688454b17f70afd5071aa0', wallet)
+
 
 const location = "u173zwu5w"  // geohash
 const locationMaxResolution = 5 // 5 chars prefix for geohash
@@ -42,6 +46,7 @@ async function main() {
   let lastPong = 0;
 
   // Init
+
   domain = {
     name: dappName,
     version: version,
@@ -71,8 +76,12 @@ async function main() {
 
     const msg: Pong = Pong.fromBinary(wakuMessage.payload)
     log('PONG: Received')
+    log(msg)
 
     // Received a pong, authenticate it
+    validatePongMessage(msg).then((isValid) => {
+      log(`PONG: Verified`)
+    })
   }
   waku.relay.addObserver(processIncomingPongMessage, generateTopics('pong'))
 
@@ -87,9 +96,38 @@ async function main() {
   waku.relay.addObserver(processIncomingBidMessage, generateTopics('bid'))
 
   // do our tests here...
-  // const payload = await createPublicKeyMessage(wallet)
-  // const wakuMessage = await WakuMessage.fromBytes(PublicKeyMessage.toBinary(payload), "/eth-pm-wallet/1/encryption-public-key/proto");
-  // await waku.relay.send(wakuMessage);
+  const payload = {
+    timestamp: (BigNumber.from(Math.floor(Date.now() / 1000))).toBigInt()
+  }
+  const topic = `/${dappName}/${version}/ping/${location.substring(0, 5)}/proto`
+  log(`sending PING to: ${topic}`)
+  const wakuMessage = await WakuMessage.fromBytes(Ping.toBinary(payload), topic);
+  await waku.relay.send(wakuMessage);
+}
+
+async function validatePongMessage(msg: Pong): Promise<boolean> {
+  log('Attempting to validate:')
+  log(msg)
+  let recovered: string
+  try {
+    // get the signing key
+    recovered = utils.verifyTypedData(
+      domain,
+      EIP712PongTypes,
+      {
+        facilityHash: msg.facilityHash,
+        geohash: msg.geohash,
+        timestamp: msg.timestamp
+      },
+      msg.signature
+    )
+    log(`recovered key: ${recovered}`)
+  } catch(e) {
+    return false
+  }
+
+  // now let's verify it on chain
+  return (await registry.isBidder(msg.facilityHash, recovered))
 }
 
 /**
@@ -218,7 +256,7 @@ function generateTopics(contentTopic: string): string[] {
   const topics = []
   for (let i = locationMinResolution; i <= locationMaxResolution; i++) {
     const geohashPrefix = location.substring(0, i)
-    topics.push(`${dappName}/${version}/${contentTopic}/${geohashPrefix}/proto`)
+    topics.push(`/${dappName}/${version}/${contentTopic}/${geohashPrefix}/proto`)
   }
   return topics
 }
