@@ -1,0 +1,17 @@
+syntax = "proto3";
+
+message SimpleChatMessage {
+  uint64 timestamp = 1;
+  string text = 2;
+}
+
+message PublicKeyMessage {
+  bytes encryptionPublicKey = 1;
+  bytes ethAddress = 2;
+  bytes signature = 3;
+}
+
+message PrivateMessage {
+  bytes toAddress = 1;
+  string message = 2;
+}

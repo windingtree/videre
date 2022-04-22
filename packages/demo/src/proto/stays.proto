@@ -1,0 +1,66 @@
+syntax = "proto3";
+
+package videre.stays;
+
+// Standards
+// * All variables that refer to keccak256 hashes, are suffixed 'Hash'
+// * All variables that refer to an ethereum address (EOA or smart contract) are suffixed 'Addr'
+// * All variables that refer to a hash exchanged in the protocol are suffixed 'Digest'
+
+message Ping {
+  // timestamp when this ping was sent
+  uint64 timestamp = 1;
+  // signature of a bidding signer for the facility, verifiable on-chain
+  bytes signature = 2;
+}
+
+message Pong {
+  // facility address (registered on chain) that's responding
+  bytes facilityHash = 1;
+  // the precise geohash where the facility is (can be verified by chain)
+  string geohash = 2;
+  // timestamp at which this pong replied
+  uint64 timestamp = 3;
+  // signature of a bidding signer for the facility, verifiable on-chain
+  bytes signature = 4;
+}
+
+message Ask {
+  // random salt used to target bid
+  bytes salt = 1;
+  // the date of check-in for the stay
+  string checkIn = 2;
+  // the date of check-out for the stay
+  string checkOut = 3;
+  // the number of adults staying
+  uint32 numPaxAdult = 4;
+  // the number of children staying
+  uint32 numPaxChild = 5;
+  // the number of spaces (rooms)
+  uint32 numSpacesReq = 6;
+}
+
+message BidLine {
+  // the spaceHash = spaceId in the facility that matches
+  bytes spaceHash = 1;
+  // initially the cost in XDAI
+  // TODO: expand to detailed cost structure
+  uint32 cost = 2;
+  // a hash of the agree upon terms (specification not decided)
+  bytes termsHash = 3;
+  // the timestamp of when this bid expires
+  uint64 expiry = 4;
+  // EIP712 signed typedata for bid used for on-chain booking
+  bytes signature = 5;
+}
+
+message Bid {
+  // facility address (registered on chain) that's responding
+  bytes facilityHash = 1;
+  // a hash of the ask, including salt that this is in response to
+  bytes askDigest = 2;
+  // bids that match the ask
+  repeated BidLine bids = 3;
+  // signature of an api signer for the facility, verifiable on-chain
+  bytes signature = 4;
+}

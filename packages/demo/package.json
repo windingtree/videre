@@ -1,0 +1,18 @@
+{
+  "name": "videre-mono",
+  "version": "1.0.0",
+  "main": "index.js",
+  "author": "mfw78 <mfw78@chasingseed.com>",
+  "license": "MIT",
+  "dependencies": {
+    "@protobuf-ts/plugin": "^2.4.0",
+    "dotenv": "^16.0.0",
+    "ethers": "^5.6.4",
+    "js-waku": "^0.20.0"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.25",
+    "ts-node": "^10.7.0",
+    "typescript": "^4.6.3"
+  }
+}
