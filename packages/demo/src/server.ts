@@ -1,38 +1,47 @@
-import { Waku, WakuMessage, utils as wakuUtils } from "js-waku";
-import { PrivateMessage, PublicKeyMessage } from "./proto/chat_message";
+import 'dotenv/config'
+
+import { BigNumber, constants, providers, utils, Wallet } from "ethers";
+import { TypedDataDomain } from "@ethersproject/abstract-signer";
+import { Waku, WakuMessage } from "js-waku";
+
+import { EIP712AskResponseTypes, EIP712BidLineTypes, EIP712PongTypes } from "./utils/EIP712Types";
+import { generateTopics, getLocationShard } from "./utils/topics";
+import { createSignedMessage, getWalletByMnemonicIndex } from "./utils/crypto";
 
 import { StaysFacility, StaysFacility__factory } from "../typechain"
-
-import { BigNumber, ethers, providers, utils, Wallet } from "ethers";
-import { equals } from "uint8arrays/equals";
-import { TypedDataDomain } from "@ethersproject/abstract-signer";
-
-import 'dotenv/config'
-import { Ping, Pong, Ask, Bid } from "./proto/stays";
-import { EIP712PongTypes } from "./utils/EIP712Types";
+import { Ping, Pong, Ask, BidLine, Bid } from "./proto/stays";
+import { Date as DateMsg } from "./proto/date";
 
 /**
  * Videre Engine - To see the market 🌳🦉.
  * 
- * Stays server instance
+ * Server 🖥️ instance
+ *
+ * @author <mfw78> mfw78@protonmail.com
  */
 
 // Logging
 const log = console.log
 
 // Settings
-const keyIndex = process.env.SERVER_KEY_INDEX ? process.env.SERVER_KEY_INDEX : 0;
-const provider = new providers.JsonRpcProvider(process.env.RPC_URL)
-const wallet = ethers.Wallet.fromMnemonic(
-  process.env.MNEMONIC ? process.env.MNEMONIC : "", `m/44'/60'/0'/0/${keyIndex}`).connect(provider)
-let facility: string
-const _location = "u173zwu5w"  // geohash
-const locationMaxResolution = 5 // 5 chars prefix for geohash
-const locationMinResolution = 3 // 3 chars prefix for geohash
-const _dataURI = "test"
+const KEY_INDEX = process.env.SERVER_KEY_INDEX ? process.env.SERVER_KEY_INDEX : 0;
+const PROVIDER = new providers.JsonRpcProvider(process.env.RPC_URL)
+const wallet = getWalletByMnemonicIndex(Number(KEY_INDEX), PROVIDER)
+const evilWallet = getWalletByMnemonicIndex(Number(KEY_INDEX)*2, PROVIDER)
+const REGISTRY_ADDRESS = process.env.REGISTRY_ADDRESS as string
+let facilityHash: string
+const _location = process.env.FACILITY_LOCATION ? process.env.FACILITY_LOCATION : "u173z"  // geohash
+const _salt = utils.keccak256(utils.toUtf8Bytes(process.env.FACILITY_NAME ? process.env.FACILITY_NAME : "Testing Facility"))
+const _dataURI = process.env.FACILITY_DATA_URI ? process.env.FACILITY_DATA_URI : "http://fill-me-in/"
+const _facilityData = {active: true, dataURI: _dataURI, geohash: _location}
 
-const dappName = "videre-stays"
-const version = "1"
+const dappName = process.env.VIDERE_DAPP_NAME ? process.env.VIDERE_DAPP_NAME : "videre"
+const version = process.env.VIDERE_DAPP_VERSION ? process.env.VIDERE_DAPP_VERSION : "1"
+const topicGenerator = (topic: string) => {
+  return generateTopics(dappName, version, topic, [_location])
+}
+
+const spaces: string[] = []
 
 log(`Using ethereum address: ${wallet.address}`)
 log(`Public key: ${wallet.publicKey}`)
@@ -41,13 +50,15 @@ let domain: TypedDataDomain
 
 async function main() {
   // local variables
+  // TODO: handle pong flooding
   let lastPong = 0;
 
   // Init
   domain = {
     name: dappName,
-    version: version,
-    chainId: (await provider.getNetwork()).chainId
+    version: version.toString(),
+    chainId: (await PROVIDER.getNetwork()).chainId,
+    verifyingContract: REGISTRY_ADDRESS
   }
   log("EIP-712 signing domain:")
   log(domain)
@@ -56,33 +67,44 @@ async function main() {
   log(`Account balance: ${balance} XDAI`)
 
   // Setup the facility
-  const registry: StaysFacility = StaysFacility__factory.connect('0x29b67856f9ca63df5e688454b17f70afd5071aa0', wallet)
-  facility = await registry.callStatic.registerFacility(
-    utils.keccak256(utils.toUtf8Bytes("facilityA")), 
-    {active: true, dataURI: _dataURI, geohash: _location}
-  )
-  console.log(`Registering facility: ${facility}...`)
-  const tx = await registry.registerFacility(
-    utils.keccak256(utils.toUtf8Bytes("facilityA")), 
-    {active: true, dataURI: _dataURI, geohash: _location}
-  )
+  const registry: StaysFacility = StaysFacility__factory.connect(REGISTRY_ADDRESS, wallet)
+  facilityHash = await registry.callStatic.registerFacility(_salt, _facilityData)
+  log(`Registering facility: ${facilityHash}...`)
+  const tx = await registry.registerFacility(_salt, _facilityData)
   const receipt = await tx.wait()
 
   if (receipt.status == 1) {
-    console.log(`...Successfully registered facility ${facility} in tx ${receipt.transactionHash}`)
+    log(`...Successfully registered facility ${facilityHash} in tx ${receipt.transactionHash}`)
   }
 
   // now also add this wallet as a bidder
-  /*const bidderRole = utils.keccak256(
-    utils.solidityPack(
-      [ "bytes32", "enum"], 
-      [facility, BigNumber.from(2)]
-    )
-  )*/
-  // log(`Bidder role: ${bidderRole}`)
-  // log(`RPC bidder role: ${await registry.role(facility, 2)}`)
-  const bidderRole = await registry.role(facility, 2)
+  const bidderRole = utils.solidityKeccak256(
+    [ "bytes32", "uint256" ], 
+    [facilityHash, 2]
+  )
+  //const bidderRole = await registry.calcRole(facility, 2)
   await registry.grantRole(bidderRole, wallet.address)
+
+  // add some spaces
+  for (let i = 0; i < 5; i++) {
+    const tx = await registry.registerSpace(
+      facilityHash, 
+      { facilityId: facilityHash, active: true, dataURI: `space${i}` }
+    )
+    const receipt = await tx.wait()
+
+    if (receipt.events) {
+      const args = receipt.events[0].args
+      if (args) spaces.push(args[1])
+    }
+  }
+
+  log(spaces)
+
+  // watch for any `Deal` events for this facility
+  registry.on(registry.filters.Deal(facilityHash), async (...vals) => {
+    log(await vals[6].getTransactionReceipt())
+  })
 
   // Connect to Waku
   log("Connecting to Waku...")
@@ -101,6 +123,9 @@ async function main() {
     if (!wakuMessage.payload) return;
 
     const msg: Ping = Ping.fromBinary(wakuMessage.payload)
+
+    // safe provided server only monitors conforming topics
+    // TODO: refactor all subscriptions to one function and check topic.
     const locShard = getLocationShard(wakuMessage.contentTopic as string)
     log(`PING: Received in ${locShard}`)
     log(msg)
@@ -115,103 +140,204 @@ async function main() {
       })
     })
   }
-  waku.relay.addObserver(processIncomingPingMessage, generateTopics('ping'))
+  waku.relay.addObserver(processIncomingPingMessage, topicGenerator('ping'))
 
   // Process incoming 'Ask' messages
   const processIncomingAskMessage = (wakuMessage: WakuMessage) => {
     // No need to attempt to decode a message if the payload is absent
     if (!wakuMessage.payload) return;
 
+    const locShard = getLocationShard(wakuMessage.contentTopic as string) as string
+
     const msg: Ask = Ask.fromBinary(wakuMessage.payload)
+    log('ASK: Received')
+    log(msg)
+
     // Received an ask, so we should respond with a bid if we can
+    auctioneer(msg, locShard).then((bid) => { 
+      const topic = `/${dappName}/${version}/bid/${locShard}/proto`
+      WakuMessage.fromBytes(Bid.toBinary(bid), topic).then((bidMsg) => {
+        waku.relay.send(bidMsg).then(() => {
+          log(`BID message sent to ${topic}`)
+        })
+      })
+    })
   }
-  waku.relay.addObserver(processIncomingAskMessage, generateTopics('ask'))
+  waku.relay.addObserver(processIncomingAskMessage, topicGenerator('ask'))
 }
 
 /**
- * Validate that the Encryption Public Key was signed by the holder of the given Ethereum address.
+ * Auctioneer that takes an ask for a specific `shard` and possibly makes a bid.
+ * @param ask what the consumer wants
+ * @param shard where the consumer is
+ * @returns a Bid or null if no Bid
  */
-/*function validatePublicKeyMessage(msg: PublicKeyMessage): boolean {
-  log("Attempting to validate:");
-  log(msg);
-  const expectedSignerAddress = msg.ethAddress;
-  log("ethereum address: 0x" + wakuUtils.bytesToHex(msg.ethAddress))
-  log("public key: " + wakuUtils.bytesToHex(msg.encryptionPublicKey))
-  try {
-    const recovered = utils.verifyTypedData(
-      domain,
-      {
-        PublishEncryptionPublicKey: [
-          { name: "message", type: "string" },
-          { name: "encryptionPublicKey", type: "string" },
-          { name: "ownerAddress", type: "string" },
-        ]
-      },
-      {
-        message: "By signing this message you certify that messages addressed to `ownerAddress` must be encrypted with `encryptionPublicKey`",
-        encryptionPublicKey: wakuUtils.bytesToHex(msg.encryptionPublicKey),
-        ownerAddress: "0x" + wakuUtils.bytesToHex(msg.ethAddress)
-      },
-      msg.signature
-    )
+async function auctioneer(ask: Ask, shard: string): Promise<Bid> {
+  const space = spaces[0]
+  const TTL = (20 * 60) // default 20 mins
+  const termsHash = utils.keccak256(utils.toUtf8Bytes("NO_TERMS"))
+  const expiry = Math.floor(Date.now() / 1000) + TTL
+  const costToken = constants.AddressZero
+  const costAtoms = utils.parseEther("150")
 
-    log("Recovered", recovered);
-    log("ethAddress", "0x" + wakuUtils.bytesToHex(msg.ethAddress));
+  // reply with static bid for now
+  const bidlineSignature = await signBidLine(
+    wallet,
+    facilityHash,
+    spaces[0],
+    ask,
+    termsHash,
+    BigNumber.from(expiry),
+    costToken,
+    costAtoms
+  )
 
-    return equals(utils.arrayify(recovered), msg.ethAddress)
-  } catch (e: unknown) {
-    console.log(e)
-    return false
+  const bidLine: BidLine = {
+    spaceHash: utils.arrayify(space),
+    termsHash: utils.arrayify(termsHash),
+    expiry:{
+      seconds: BigInt(expiry),
+      nanos: 0
+    },
+    cost: {
+      atoms: utils.arrayify(
+        utils.defaultAbiCoder.encode(
+          ["uint256"], [costAtoms]
+        )
+      )
+    },
+    signature: utils.arrayify(bidlineSignature)
   }
-}*/
 
-export async function createPongMessage(
-  signer: Wallet
-): Promise<Pong> {
-  // floor prevents future timestamped pings
-  const timestamp = Math.floor(Date.now() / 1000)
+  // calculate a digest of the ask
+  const askDigest = utils.keccak256(Ask.toBinary(ask))
 
   const values = {
-    facilityHash: facility,
-    geohash: _location,
-    timestamp: timestamp
+    facilityHash: facilityHash,
+    askDigest: askDigest,
+    bids: [bidlineSignature].map((val) => { return { signature: val } })
+  }
+
+  const bid: Bid = await createSignedMessage<Object,Bid>(
+    domain,
+    EIP712AskResponseTypes,
+    values,
+    (signature): Bid => {
+      return {
+        facilityHash: utils.arrayify(facilityHash),
+        askDigest: utils.arrayify(utils.keccak256(Ask.toBinary(ask))),
+        bids: [
+          bidLine
+        ],
+        signature: utils.arrayify(signature)
+      }
+    }, wallet
+  )
+
+  log('Generated Bid:')
+  log(bid)
+
+  return bid
+}
+
+/**
+ * Sign a bid line for a corresponding ask.
+ * @param signer to sign the bid with
+ * @param facilityHash that this bid is from
+ * @param spaceHash that this bid offers
+ * @param ask the request that asked for this bid
+ * @param termsHash agreed to for this bid
+ * @param expiry of this bid (seconds)
+ * @param costToken to pay for this bid (address zero = native token)
+ * @param costAtoms the cost in `costToken` wei
+ * @returns a signature that may be used to execute this deal
+ */
+export async function signBidLine(
+  signer: Wallet,
+  facilityHash: string,
+  spaceHash: string,
+  ask: Ask,
+  termsHash: string,
+  expiry: BigNumber,
+  costToken: string,
+  costAtoms: BigNumber
+): Promise<string> {
+  // calculate a digest of the ask
+  const askDigest = utils.keccak256(Ask.toBinary(ask))
+
+  const values = {
+    facilityHash: facilityHash,
+    spaceHash: spaceHash,
+    termsHash: termsHash,
+    askDigest: askDigest,
+    expiry: expiry,
+    costToken: costToken,
+    costAtoms: costAtoms
   }
 
   try {
-    log("Asking wallet to sign PONG");
-    const signature = await signer._signTypedData(domain, EIP712PongTypes, values)
-    log("PONG signed");
+    return await signer._signTypedData(domain, EIP712BidLineTypes, values);
+  } catch(e) {
+    throw e
+  }
+}
 
-    return {
-      facilityHash: utils.arrayify(facility),
-      geohash: _location,
-      timestamp: BigInt(timestamp),
-      signature: utils.arrayify(signature)
-    };  
+export async function signBid(
+  signer: Wallet,
+  facilityHash: string,
+  ask: Ask,
+  bids: string[]
+): Promise<string> {
+  // calculate a digest of the ask
+  const askDigest = utils.keccak256(Ask.toBinary(ask))
+
+  const values = {
+    facilityHash: facilityHash,
+    askDigest: askDigest,
+    bids: bids.map((val) => { return { signature: val } })
+  }
+
+  try {
+    return await signer._signTypedData(domain, EIP712AskResponseTypes, values);
   } catch(e) {
     throw e
   }
 }
 
 /**
- * Return an array of topics to pass to waku
- * @param contentTopic The protocol specific topic this relates to 
+ * Create a `PONG` reply message and sign.
+ * @param signer to be used for EIP712 signature. Must be a `bidder`
+ * @returns a pong protobuf reply packet
  */
-function generateTopics(contentTopic: string): string[] {
-  const topics = []
-  for (let i = locationMinResolution; i <= locationMaxResolution; i++) {
-    const geohashPrefix = _location.substring(0, i)
-    const newTopic = `/${dappName}/${version}/${contentTopic}/${geohashPrefix}/proto`
-    console.log(`monitoring topic: ${newTopic}`)
-    topics.push(newTopic)
-  }
-  return topics
-}
+export async function createPongMessage(
+  signer: Wallet
+): Promise<Pong> {
+    // TODO: Rate limiting on pong messages
+    // floor prevents future timestamped pings
+    const timestamp = Math.floor(Date.now() / 1000)
 
-function getLocationShard(contentTopic: string): string | undefined {
-  const regex = /\/([\w\-]*)\/([\d]+)\/([\w\-]*)\/([\w]*)\/([\w]*)/;
-  const m = contentTopic.match(regex)
-  return (m ? m[4] : undefined)
+    const values = {
+      facilityHash: facilityHash,
+      geohash: _location,
+      timestamp: timestamp
+    }
+
+    return createSignedMessage<Object,Pong>(
+      domain,
+      EIP712PongTypes,
+      values,
+      (signature): Pong => {
+        return {
+          facilityHash: utils.arrayify(facilityHash),
+          geohash: _location,
+          timestamp: {
+            seconds: BigInt(timestamp),
+            nanos: 0
+          },
+          signature: utils.arrayify(signature)
+        }
+      }, signer
+    )
 }
 
 main()
