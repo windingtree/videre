@@ -7,7 +7,7 @@ slug: /
 
 # Tutorial Intro
 
-Let's discover **Docusaurus in less than 5 minutes**.
+Let's run the Videre engine!
 
 ## Getting Started
 
