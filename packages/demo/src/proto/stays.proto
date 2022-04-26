@@ -2,6 +2,10 @@ syntax = "proto3";
 
 package videre.stays;
 
+import "money.proto";
+import "timestamp.proto";
+import "date.proto";
+
 // Standards
 // * All variables that refer to keccak256 hashes, are suffixed 'Hash'
 // * All variables that refer to an ethereum address (EOA or smart contract) are suffixed 'Addr'
@@ -18,7 +22,7 @@ message Pong {
   // the precise geohash where the facility is (can be verified by chain)
   string geohash = 2;
   // timestamp at which this pong replied
-  uint64 timestamp = 3;
+  google.protobuf.Timestamp timestamp = 3;
   // signature of a bidding signer for the facility, verifiable on-chain
   bytes signature = 4;
 }
@@ -27,13 +31,13 @@ message Ask {
   // random salt used to target bid
   bytes salt = 1;
   // the date of check-in for the stay
-  string checkIn = 2;
+  google.type.Date checkIn = 2;
   // the date of check-out for the stay
-  string checkOut = 3;
+  google.type.Date checkOut = 3;
   // the number of adults staying
   uint32 numPaxAdult = 4;
   // the number of children staying
-  uint32 numPaxChild = 5;
+  optional uint32 numPaxChild = 5;
   // the number of spaces (rooms)
   uint32 numSpacesReq = 6;
 }
@@ -41,13 +45,13 @@ message Ask {
 message BidLine {
   // the spaceHash = spaceId in the facility that matches
   bytes spaceHash = 1;
+  // a hash of the agree upon terms (specification not decided)
+  bytes termsHash = 2;
+  // the timestamp of when this bid expires
+  google.protobuf.Timestamp expiry = 3;
   // initially the cost in XDAI
   // TODO: expand to detailed cost structure
-  uint32 cost = 2;
-  // a hash of the agree upon terms (specification not decided)
-  bytes termsHash = 3;
-  // the timestamp of when this bid expires
-  uint64 expiry = 4;
+  videre.type.ERC20Native cost = 4;
   // EIP712 signed typedata for bid used for on-chain booking
   bytes signature = 5;
 }
@@ -59,6 +63,6 @@ message Bid {
   bytes askDigest = 2;
   // bids that match the ask
   repeated BidLine bids = 3;
-  // signature of an api signer for the facility, verifiable on-chain
+  // signature of a bidder for the facility, verifiable on-chain
   bytes signature = 4;
 }
