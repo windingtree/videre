@@ -1,0 +1,12 @@
+{
+  "name": "videre",
+  "version": "0.0.1",
+  "author": "mfw78 <mfw78@protonmail.com>",
+  "private": true,
+  "scripts": {
+    "bootstrap": "yarn lerna bootstrap"
+  },
+  "devDependencies": {
+    "lerna": "^4.0.0"
+  }
+}
