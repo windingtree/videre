@@ -13,12 +13,7 @@ __pycache__
 node_modules/
 
 # hardhat / typechain artifacts
-artifacts/
-cache/
 typechain/
-reports/
-coverage*
-inheritance-graph.dot
 
 # dotenv
 .env*
