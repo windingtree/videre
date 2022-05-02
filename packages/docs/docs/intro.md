@@ -12,4 +12,4 @@ The Videre Protocol is a blockchain-secured, consumer-anonymous, P2P marketplace
 ## Getting started
 
 - [Quick-start](./tutorial/quick-start)
-- [Protocol details](./protocol/intro)
+- [Protocol details](./protocol/overview)
