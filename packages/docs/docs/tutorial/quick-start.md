@@ -165,7 +165,7 @@ At this point, you should see the following activity:
 6. The `server` crafts a *signed* bid to `client`.
 7. The `client` verifies the `server`'s bid, and chooses one of the offers.
 8. The `client` uses the bid's `signature` to make the deal on-chain.
-9. The `server`, through event monitoring, can see that the that the `client` has made the deal. 🥳
+9. The `server`, through event monitoring, can see that the `client` has made the deal. 🥳
 
 :::tip
 
