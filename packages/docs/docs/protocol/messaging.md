@@ -93,7 +93,7 @@ message BidTerm {
 // an optional item is an item that comes with an additional cost
 message BidOptionItem {
   BidItem item = 1;
-  videre.type.ERC20Native cost = 2;
+  repeated videre.type.ERC20Native cost = 2;
   // bidder signs hash of fields (1, 2, askDigest)
   bytes signature = 3;
 }
@@ -101,7 +101,7 @@ message BidOptionItem {
 // an optional term is a term that comes with an additional cost
 message BidOptionTerm {
   BidTerm term = 1;
-  videre.type.ERC20Native cost = 2;
+  repeated videre.type.ERC20Native cost = 2;
   // bidder signs hash of fields (1, 2, askDigest)
   bytes signature = 3;
 }
@@ -119,13 +119,15 @@ message BidLine {
   repeated BidTerm terms = 2;
   // the option(s) offered, ie. add breakfast, add fully-flexible
   BidOptions options = 3;
+  // the maximum number of times this bid authorisation can be used
+  uint32 limit = 4;
   // the latest timestamp at which this bid is valid
-  google.protobuf.Timestamp expiry = 4;
+  google.protobuf.Timestamp expiry = 5;
   // the cost in specified tokens or native unit of account
   // TODO: expand to detailed cost structure
-  videre.type.ERC20Native cost = 5;
+  repeated videre.type.ERC20Native cost = 6; // include the capabilities for negative costs
   // bidder signs hash (serviceProvider.id, askDigest, items, terms, expiry, cost))
-  bytes signature = 6;
+  bytes signature = 7;
 }
 
 message Bids {
