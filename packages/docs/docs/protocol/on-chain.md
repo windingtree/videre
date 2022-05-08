@@ -5,26 +5,32 @@ title: Execution (On-Chain)
 
 ## Registries
 
-There is a need for a *source of truth* for what can be trusted in the Videre protocol. The registries broadly cover the areas of of *authorised signers* and *document timestamps*.
+There is a need for a *source of truth* as to what can be trusted in the Videre protocol. The registries broadly cover the areas of:
+
+* [Industries](#industries)
+* [Document Timestamps](#document-timestamps)
+* [Service Providers](#service-providers)
 
 :::tip
-For initial development of Videre, addresses will require whitelisting so that they may register a service provider. There will be a hard limit set of 6 months at which the whitelist requirement will automatically be cancelled.
+For initial development phase of Videre, addresses will require whitelisting so that they may register a service provider with smart-contract enforced sunset clause for the whitelisting of **180 days** (ie. after which *anyone* may register). 
 :::
 
 :::warning
-The system currently does **NOT** provide reputation based scoring, or other information that may assist a consumer in determining a service provider's trustworthiness. As raised in [process](./process) documentation, the Videre protocol will **NOT** initially support immediate transfer of funds to service providers without intervention / consent from the consumer.
+Reputation based scoring / assessment is **OUTSIDE OF SCOPE** for the initial development phase of Videre. During this phase, the Videre protocol will **NOT** support terms that allow for the transfer of funds to service providers without intervention / consent of the consumer. Reputation base scoring / dispute settlement is targetted to be implemented after the cessation of the whitelist timeframe.
 :::
 
-### Industries
+### Lines (Industries)
 
-This registry provides a canonical source for industry-specific state transition contracts that allow for the issuance of vouchers, and subsequent state changes. 
+This registry provides a canonical source for line-specific state transition contracts that allow for the issuance of `stubs`, and subsequent state changes.
 
 The registry shall contain a bytes32 to address mapping for the industry-specific code (eg. "STAYS") to the implementing contract. The registry shall also contain a mapping of industry to service provider to uint256. This is to be interpreted as a `can`, essentially indcating that the service provider providers a service in the specific industry, and the industry-specific terms they agree to are governed by the implementation.
 
 Additionally, the service provider registry shall provide a lookup function to gather the information required from service providers. This is to allow migration from a custom-rolled service provider, through to ORG.iD pending review.
 
+Protocol fees for the specific industry are stored within this contract.
+
 :::caution
-It is a requirement that the service provider has agreed to the industry-specific terms / life-cycle. If they cease to agree, and exit the industry, no **NEW** voucher issuance may take place, but old vouchers and their terms remain effective.
+It is a requirement that the service provider has agreed to the industry-specific terms / life-cycle. If they cease to agree, and exit the industry, no **NEW** stub issuance may take place, but old stubs and their terms remain effective.
 :::
 
 :::tip
@@ -37,7 +43,7 @@ The service provider registry allows consumers to:
 
 1. Find where to get industry-specific information about the service provider.
 2. Determine who is authorised to act in what role on behalf of the service provider.
-3. Determine when an authorised party was authorised, and if their authorisation is revoked, when that was revoked.
+3. Determine when an authorised party was authorised, and if their authorisation is revoked, when it was revoked.
 
 ### Document Timestamps
 
@@ -53,35 +59,44 @@ Proof of ownership of the document is outside the scope of the timestamp registr
 
 ## Accounting
 
-Accounting of funds is handled by a centralised accounting contract, similar to the `vat` system as used in MakerDAO. The actual funds are held by *joiner* contracts. This allows for the system to limit the types of collateral / tokens that may be used to pay for vouchers. There are three types of accounts that own funds in Videre's `vat`:
+Accounting of funds is handled by a centralised accounting contract, similar to the `vat` system as used in MakerDAO. The actual funds are held by *joiner* contracts. This allows for the system to limit the types of collateral / tokens that may be used to pay for stubs. There are three types of accounts that may own collateral managed within the `vat`:
 
-1. Service providers
-2. Vouchers
-3. The protocol
+1. Service Providers (`bytes32`)
+2. Stubs (`bytes32`)
+3. Ethereum addresses (`address`)
 
-Funds are specified in a mapping of `address` to `token` to `balance`. The address zero `token` may be implemented and represent the native unit of account. 
+Funds are specified in mappings such that:
+
+1. For `bytes32` accounts: `mapping (bytes32 => mapping (address => uint256))`
+2. For `address` accounts: `mapping (address => mapping (address => uint256))`
+
+The zero address `token` MAY be implemented and represent the deployment chain's native unit of account.
 
 :::tip
-As vouchers may be resold on secondary markets, any monetary value that is attached to them should be accounted by voucher. 
+As stubs may be resold on secondary markets, any collateral attached to them should move simultaneously, therefore the stub represents an account itself.
 :::
 
-Ownership of vouchers is handled through a `voucher` to `address` mapping.
+Ownership of stubs is handled through a `stub` to `address` mapping:
 
-Similar to MakerDAO's `vat`, root administrative contracts can be attached to the `vat` to allow movement of funds and voucher ownership. This allows for future use cases such as a ProxyContract that implements zk ownership of a voucher.
+* `mapping (bytes32 => address)`
 
-Also, similar to MakerDAO's `vat` contract, the system itself will have an account in this contract, and it's at this account where the system will accrue any protocol fees.
+Similar to MakerDAO's `vat`, root administrative contracts can be attached to the `vat` to allow custom movement of funds / stub ownership. This allows for future use cases such as a ProxyContract that implements zk ownership of a stub.
 
-Additionally, the protocol fee is to be specified in this contract in basis points on a public variable.
+Industrial lines (such as `stays`) will have an account within the `vat`. This account will be an *ethereum address* corresponding to the contract's deployment address. This allows for the system to accrue protocol fees, and to account for these fees on a *per industry basis*, allowing the case of different protocol fees depending on an industry.
 
-## State Transition
+## Stubs
 
-Every voucher issued follows a defined life-cycle, the simplest being a ticket to an event which is either `issued`, or `clipped`. It is the job of industry contracts to implement the `ILifeCycle` interface to define the industry-specific life-cycle rules for vouchers.
+When a service provider and consumer come to an agreement, they make a `deal`. The result of this `deal` is a *stub* (voucher) that represents a future service to be delivered by the service provider to the consumer. This future service (*items*) is subject to *terms* and carries a specified *cost*. It is the role of the line (industry) contract to implement rules defining the *lifecycle* of their issued stubs.
+
+### Items
+
+An `item` array, in the [primitive](./primitives) sense.
 
 ### Terms
 
 A `term` is a business logic primitive for Videre, and may be called by either party, depending on the `term`. For example there may be a `NO_REFUND_AFTER_CHECKIN` term where upon the `consumer` checks into the accommodation facility, the `service provider` may call the term to have the whole balance of funds transferred to themselves.
 
-Another example may be a `48HR_RAINCHECK` by which the voucher may be fully refundable. The `consumer` could then call the `term` which would refund their payment provided the conditions were met.
+Another example may be a `48HR_RAINCHECK` by which the stub may be fully refundable. The `consumer` could then call the `term` which would refund their payment provided the conditions were met.
 
 :::caution
 Careful consideration should be given to terms and the privacy implications that they may have.
@@ -93,6 +108,6 @@ These are contracts that help with usability / specific cases.
 
 ### NFT Wrapper
 
-A `voucher` holder can transfer their `voucher` to the NFTWrapper which then subsequently becomes the owner of the `voucher` in the `vat`, though the respective NFT `tokenId` that is issued is minted to the voucher holder.
+A `stub` holder can transfer their `stub` to the NFTWrapper which then subsequently becomes the owner of the `stub` in the `vat`, though the respective NFT `tokenId` that is issued is minted to the stub holder.
 
-The wrapper would contain a `tokenId` to `voucher` mapping, and `tokenId` to `owner` mapping. This wrapper should also proxy the `ILifeCycle` interface so that calls can just be forwarded directly from the token owner to the industry-specific life-cycle implementation.
+The wrapper would contain a `tokenId` to `stub` mapping, and `tokenId` to `owner` mapping. This wrapper should also proxy the `ILifeCycle` interface so that calls can just be forwarded directly from the token owner to the industry-specific life-cycle implementation.
