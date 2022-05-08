@@ -28,7 +28,7 @@ group Deal
    C->BC: Deal <&dollar> <&key>
    activate BC
    BC->BC: Transfer funds to Contract <&dollar>
-   BC->BC: Create Voucher NFT
+   BC->BC: Create Stub NFT
    BC-->SP: Event (Deal)
    opt#red #pink If non-refundable <&warning>
    BC->SP: Transfer funds
