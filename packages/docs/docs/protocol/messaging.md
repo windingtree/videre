@@ -14,7 +14,7 @@ All clients communicating on the Videre protocol do so on *known* Waku `contentT
 * `which` real-world industry the service is conducted in (eg. *stays*) for accommodation.
 * A protocol `version` number to allow for graceful handling of protocol upgrades.
 * `what` the specific component for the API is (eg. `ping`).
-* The `where` in which this interaction is taking place, expressed as an [`h3Index`](https://h3geo.org/), or *industry-specific* geocoding (e.g. `JKF-LHR` for aviation).
+* `where` this interaction is taking place, defined by the industry implementation. For example, `stays` elects to implement this as an [`h3Index`](https://h3geo.org/), whereas aviation may elect for this to be a bytes string such as `JKF-LHR`.
 * `how` the protocol is encoded, ie. `proto` for protobuf.
 
 A complete example:
@@ -44,8 +44,8 @@ message Ping {
 message Pong {
   // primitive serviceProvider.id
   bytes serviceProvider = 1;
-  // the location where services are provided
-  uint64 h3loc = 2;
+  // the location where the services are provided - specified by the industry implementation
+  bytes loc = 2;
   // timestamp when the pong was sent.
   google.protobuf.Timestamp timestamp = 3;
   // signature of a bidder signer for the service provider, verifiable on-chain
@@ -145,6 +145,12 @@ message Bids {
 ### Stays (Accommodation Implementation)
 
 The quick-start / reference implementation for Videre is targetted at the accommodation industry. Here we define the ask parameters used by *consumers*.
+
+#### Videre Protocol
+
+* Content-topic `where` and `loc` reply: For `stays`, this is implemented as an [`h3Index`](https://h3geo.org/).
+
+#### Messages
 
 ```protobuf
 message StaysAsk {
