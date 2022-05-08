@@ -22,11 +22,13 @@ This allows any service provider to create an *industry-specific* marketplace on
 
 ## Terminology
 
+*Line* refers to an industry that has an implementation.
+
 *Service provider* refers to an entity providing an **intangible** act for which another party is willing to pay for.
 
 *Consumer* refers to the party purchasing the intangible act.
 
-*Voucher* represents a service owed by the service provider to the consumer subject to terms.
+*Stub* represents a service owed by the service provider to the consumer subject to terms.
 
 *Messaging system* refers to the chosen protocol on which the service provider and consumer have agreed to communicate.
 

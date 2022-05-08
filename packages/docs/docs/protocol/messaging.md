@@ -29,7 +29,7 @@ where   = 8928308280fffff
 how     = proto
 ```
 
-## Payloads
+## Messages
 
 ### Discovery
 
@@ -88,6 +88,10 @@ message BidItem {
 message BidTerm {
   // primitive term.id - terms by which the service is subject to
   bytes termsHash = 1;
+  // the contract address implementing ITerm
+  bytes implementation = 2;
+  // abi encoded payload that may be passed to a contract implementing ITerm
+  optional bytes payload = 3;
 }
 
 // an optional item is an item that comes with an additional cost
