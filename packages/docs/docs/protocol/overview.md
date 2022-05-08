@@ -32,7 +32,7 @@ This allows any service provider to create an *industry-specific* marketplace on
 
 *Messaging system* refers to the chosen protocol on which the service provider and consumer have agreed to communicate.
 
-*Personally identifiable information* (PII) refers to any piece of data that can be used to uniquely identify a user. For example, the signature verification key, and the has of one's static IP address are unique for each user and hence count as PII.
+*Personally identifiable information* (PII) refers to any piece of data that can be used to uniquely identify a user. For example, the signature verification key, and the hash of one's static IP address are unique for each user and hence count as PII.
 
 ## User stories
 
