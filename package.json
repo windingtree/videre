@@ -5,7 +5,7 @@
   "private": true,
   "scripts": {
     "bootstrap": "yarn lerna bootstrap",
-    "commit": "git-cz",
+    "commit": "git-cz -S",
     "changelog": "conventional-changelog -p angular -r 2 -i CHANGELOG.md -s"
   },
   "devDependencies": {
