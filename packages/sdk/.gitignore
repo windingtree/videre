@@ -11,6 +11,7 @@ __pycache__
 
 # node
 node_modules/
+lib/
 
 # hardhat / typechain artifacts
 cache/
@@ -22,3 +23,4 @@ typechain/
 
 # ts generated protobufs
 src/proto/*.ts
+!src/proto/index.ts

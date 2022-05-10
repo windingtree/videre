@@ -11,16 +11,16 @@
     "windingtree",
     "markets"
   ],
+  "main": "./lib/cjs/index.js",
+  "module": "./lib/esm/index.js",
   "scripts": {
-    "protoc": "protoc --ts_out src/proto --proto_path ./src/proto ./src/proto/*.proto",
-    "build:protoc": "mkdir proto && protoc --ts_out proto --proto_path ./src/proto ./src/proto/*.proto",
-    "build:typechain": "typechain --target ethers-v5 --glob './node_modules/@windingtree/videre-contracts/artifacts/**/*.json' --out-dir typechain",
-    "build": "yarn build:typechain && yarn build:protoc && cp -pR ./src/utils ./"
+    "typechain": "typechain --target ethers-v5 --glob './node_modules/@windingtree/videre-contracts/artifacts/**/*.json' --out-dir src/typechain",
+    "protoc": "protoc --ts_out ./src/proto --proto_path ./src/proto ./src/proto/*.proto",
+    "tsc": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
+    "prepublish": "npm run typechain && npm run protoc && npm run tsc"
   },
   "files": [
-    "proto",
-    "typechain",
-    "utils"
+    "lib/"
   ],
   "publishConfig": {
     "access": "public"
