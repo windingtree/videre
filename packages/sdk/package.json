@@ -11,9 +11,9 @@
     "windingtree",
     "markets"
   ],
-  "main": "./lib/cjs/index.js",
-  "module": "./lib/esm/index.js",
-  "types": "./lib/cjs/index.d.ts",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/cjs/index.d.ts",
   "scripts": {
     "typechain": "typechain --target ethers-v5 --glob './node_modules/@windingtree/videre-contracts/artifacts/**/*.json' --out-dir src/typechain",
     "protoc": "protoc --ts_out ./src/proto --proto_path ./src/proto ./src/proto/*.proto",
@@ -21,7 +21,7 @@
     "prepublish": "npm run typechain && npm run protoc && npm run tsc"
   },
   "files": [
-    "lib/"
+    "dist/"
   ],
   "publishConfig": {
     "access": "public"
