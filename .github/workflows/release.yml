@@ -12,9 +12,10 @@ jobs:
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
+      - name: "Setup npm"
+        run: |
+          "//registry.npmjs.org/:_authToken=${{ secrets.NPM_AUTH_TOKEN }}"
       - run: yarn
       - run: yarn lerna bootstrap
       - run: yarn lerna run --scope videre-sdk build
       - run: yarn lerna publish --yes from-git
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
