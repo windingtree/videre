@@ -15,6 +15,6 @@ jobs:
       - run: yarn
       - run: yarn lerna bootstrap
       - run: yarn lerna run --scope videre-sdk build
-      - run: yarn lerna publish from-git
+      - run: yarn lerna publish --yes from-git
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}

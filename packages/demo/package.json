@@ -5,6 +5,7 @@
   "main": "index.js",
   "author": "mfw78 <mfw78@protonmail.com>",
   "license": "GPL-3.0-only",
+  "private": "true",
   "keywords": [
     "videre",
     "p2p",
