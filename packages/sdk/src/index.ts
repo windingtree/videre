@@ -1,6 +1,6 @@
-import type * as proto from "./proto";
-export type { proto }
-import type * as chain from "./typechain";
-export type { chain }
-import type * as utils from "./utils";
-export type { utils }
+import * as proto from "./proto";
+export { proto }
+import * as chain from "./typechain";
+export { chain }
+import * as utils from "./utils";
+export { utils }

@@ -12,6 +12,7 @@ __pycache__
 # node
 node_modules/
 lib/
+dist/
 
 # hardhat / typechain artifacts
 cache/
