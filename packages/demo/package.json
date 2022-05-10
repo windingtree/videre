@@ -1,5 +1,5 @@
 {
-  "name": "videre-demo",
+  "name": "@windingtree/videre-demo",
   "description": "To see the market",
   "version": "1.0.0",
   "main": "index.js",
