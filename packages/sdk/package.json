@@ -1,6 +1,6 @@
 {
   "name": "@windingtree/videre-sdk",
-  "version": "0.2.0",
+  "version": "0.2.3",
   "description": "Videre Protocol SDK",
   "author": "mfw78 <mfw78@protonmail.com>",
   "license": "MIT",
@@ -17,7 +17,6 @@
     "build:typechain": "typechain --target ethers-v5 --glob './node_modules/@windingtree/videre-contracts/artifacts/**/*.json' --out-dir typechain",
     "build": "yarn build:typechain && yarn build:protoc && cp -pR ./src/utils ./"
   },
-  "private": false,
   "files": [
     "proto",
     "typechain",
