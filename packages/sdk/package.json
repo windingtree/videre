@@ -1,6 +1,6 @@
 {
   "name": "@windingtree/videre-sdk",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "description": "Videre Protocol SDK",
   "author": "mfw78 <mfw78@protonmail.com>",
   "license": "MIT",
@@ -22,6 +22,9 @@
     "typechain",
     "utils"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "devDependencies": {
     "@typechain/ethers-v5": "^10.0.0",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
