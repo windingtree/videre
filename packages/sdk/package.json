@@ -1,6 +1,6 @@
 {
   "name": "@windingtree/videre-sdk",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Videre Protocol SDK",
   "author": "mfw78 <mfw78@protonmail.com>",
   "license": "MIT",
@@ -13,6 +13,7 @@
   ],
   "main": "./lib/cjs/index.js",
   "module": "./lib/esm/index.js",
+  "types": "./lib/cjs/index.d.ts",
   "scripts": {
     "typechain": "typechain --target ethers-v5 --glob './node_modules/@windingtree/videre-contracts/artifacts/**/*.json' --out-dir src/typechain",
     "protoc": "protoc --ts_out ./src/proto --proto_path ./src/proto ./src/proto/*.proto",
