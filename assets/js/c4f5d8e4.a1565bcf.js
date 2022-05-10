@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_windingtree_videre_sdk_docs=self.webpackChunk_windingtree_videre_sdk_docs||[]).push([[195],{2841:function(e,n,t){t.r(n);var i=t(7294),s=(t(2600),t(9960),t(2263)),d=(t(4996),t(6775));n.default=function(){return(0,s.Z)().siteConfig,i.createElement(d.l_,{to:"docs/"})}}}]);

@@ -1,0 +1,1 @@
+"use strict";(self.webpackChunk_windingtree_videre_sdk_docs=self.webpackChunk_windingtree_videre_sdk_docs||[]).push([[528],{5745:function(e){e.exports=JSON.parse('{"plugin":{"name":"docusaurus-plugin-content-pages","id":"default"}}')}}]);
