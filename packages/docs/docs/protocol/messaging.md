@@ -80,23 +80,18 @@ message BidWrapper {
   bytes signature = 4;
 }
 
-message BidItem {
-  // primitive item.id - service being offered
-  bytes itemHash = 1;
-}
-
 message BidTerm {
   // primitive term.id - terms by which the service is subject to
-  bytes termsHash = 1;
+  bytes term = 1;
   // the contract address implementing ITerm
-  bytes implementation = 2;
+  bytes impl = 2;
   // abi encoded payload that may be passed to a contract implementing ITerm
-  optional bytes payload = 3;
+  optional bytes txPayload = 3;
 }
 
 // an optional item is an item that comes with an additional cost
 message BidOptionItem {
-  BidItem item = 1;
+  bytes item = 1;
   repeated videre.type.ERC20Native cost = 2;
   // bidder signs hash of fields (1, 2, askDigest)
   bytes signature = 3;
@@ -118,7 +113,7 @@ message BidOptions {
 
 message BidLine {
   // the item(s) offered in a bundled state, ie. space + breakfast
-  repeated BidItem items = 1;
+  repeated bytes items = 1;
   // the term(s) offered in a bundled state, ie. fully flexible + no cancellation
   repeated BidTerm terms = 2;
   // the option(s) offered, ie. add breakfast, add fully-flexible
@@ -126,11 +121,11 @@ message BidLine {
   // the maximum number of times this bid authorisation can be used
   uint32 limit = 4;
   // the latest timestamp at which this bid is valid
-  google.protobuf.Timestamp expiry = 5;
+  uint32 expiry = 5;
   // the cost in specified tokens or native unit of account
   // TODO: expand to detailed cost structure
   repeated videre.type.ERC20Native cost = 6; // include the capabilities for negative costs
-  // bidder signs hash (serviceProvider.id, askDigest, items, terms, expiry, cost))
+  // bidder signs hash (AskWrapper.salt, limit, expiry, serviceProvider (which), askDigest (params), items, terms, options, cost)
   bytes signature = 7;
 }
 
