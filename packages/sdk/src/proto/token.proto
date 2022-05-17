@@ -2,14 +2,13 @@ syntax = "proto3";
 
 package videre.type;
 
-// Represents a value in an ERC20 token, or the native unit of account.
-// This contract and atoms are taken reference to the `chainId` of the signing
-// domain.
+// Represents a value in an ERC20 token, or the native unit of account. The gem
+// and wad are taken reference to the `chainId` of the signing domain.
 message ERC20Native {
-  // The token contract that this refers to.
-  // If not specified, refers to native unit of account.
-  optional bytes token = 1;
+  // The token contract that this refers to. If not specified, refers to native
+  // unit of account.
+  optional string gem = 1;
 
-  // The amount of atoms. Limited to 32 bytes (uint256)
-  bytes atoms = 2;
+  // The amount of gem. In decimal (uint256)
+  string wad = 2;
 }
