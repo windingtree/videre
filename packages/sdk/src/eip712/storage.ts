@@ -17,7 +17,7 @@ export const ServiceTermData: Record<string, TypedDataField[]> = {
 
 export const ServiceProviderData: Record<string, TypedDataField[]> = {
   ServiceProviderData: [
-    { name: "serviceProviderId", type: "bytes32" },
+    { name: "serviceProvider", type: "bytes32" },
     { name: "items", type: "ServiceItemData[]" },
     { name: "terms", type: "ServiceTermData[]" },
     { name: "payload", type: "bytes" }
