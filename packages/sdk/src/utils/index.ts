@@ -5,5 +5,6 @@ export type {
 }
 export { 
   verifyMessage,
+  createSignedMessage,
   constants
 }
