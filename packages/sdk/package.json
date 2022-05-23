@@ -17,8 +17,9 @@
   "scripts": {
     "typechain": "typechain --target ethers-v5 --glob './node_modules/@windingtree/videre-contracts/artifacts/**/*.json' --out-dir src/typechain",
     "protoc": "protoc --ts_out ./src/proto --proto_path ./src/proto ./src/proto/*.proto",
+    "proto:source": "rm -rf ./dist/proto && mkdir ./dist/proto && cp -R ./src/proto/*.proto ./dist/proto/",
     "tsc": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
-    "prepublish": "npm run typechain && npm run protoc && npm run tsc",
+    "prepublish": "npm run typechain && npm run protoc && npm run tsc && npm run proto:source",
     "test": "mocha --loader=ts-node/esm --extension ts"
   },
   "files": [
