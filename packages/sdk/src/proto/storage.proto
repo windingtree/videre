@@ -2,13 +2,6 @@ syntax = "proto3";
 
 package videre.storage;
 
-message SignedPayloadWrapper {
-  // ServiceProvider.data
-  bytes payload = 1;
-  // signed hash of payload by ServiceProvider `api` signer
-  bytes signature = 2;
-}
-
 message ServiceItemData {
   // primitive item.id
   bytes item = 1;
@@ -34,4 +27,6 @@ message ServiceProviderData {
   repeated ServiceTermData terms = 3;
   // industry-specific payload describing service provider
   bytes payload = 4;
+  // signed hash by ServiceProvider `api` signer
+  bytes signature = 5;
 }
