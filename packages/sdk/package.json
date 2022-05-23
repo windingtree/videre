@@ -15,7 +15,7 @@
   "module": "./dist/esm/index.js",
   "types": "./dist/cjs/index.d.ts",
   "scripts": {
-    "typechain": "typechain --target ethers-v5 --glob './node_modules/@windingtree/videre-contracts/artifacts/**/*.json' --out-dir src/typechain",
+    "typechain": "typechain --target ethers-v5 --glob './node_modules/@windingtree/videre-contracts/artifacts/contracts/registries/ServiceProviderRegistry.sol/ServiceProviderRegistry.json' --out-dir ./src/typechain",
     "protoc": "protoc --ts_out ./src/proto --proto_path ./src/proto ./src/proto/*.proto",
     "proto:source": "rm -rf ./dist/proto && mkdir ./dist/proto && cp -R ./src/proto/*.proto ./dist/proto/",
     "tsc": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
