@@ -32,4 +32,6 @@ message ServiceProviderData {
   repeated ServiceItemData items = 2;
   // terms that may be applicable to services provided
   repeated ServiceTermData terms = 3;
+  // industry-specific payload describing service provider
+  bytes payload = 4;
 }
