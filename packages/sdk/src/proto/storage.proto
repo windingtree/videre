@@ -28,5 +28,5 @@ message ServiceProviderData {
   // industry-specific payload describing service provider
   bytes payload = 4;
   // signed hash by ServiceProvider `api` signer
-  bytes signature = 5;
+  optional bytes signature = 5;
 }
