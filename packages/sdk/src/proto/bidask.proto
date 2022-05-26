@@ -26,7 +26,7 @@ message BidTerm {
   // primitive term.id - terms by which the service is subject to
   bytes term = 1;
   // the contract address implementing ITerm
-  bytes impl = 2;
+  string impl = 2;
   // abi encoded payload that may be passed to a contract implementing ITerm
   optional bytes txPayload = 3;
 }
