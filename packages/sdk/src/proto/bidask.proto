@@ -34,7 +34,7 @@ message BidTerm {
 
 // an optional item is an item that comes with an additional cost
 message BidOptionItem {
-  bytes item = 1;
+  required bytes item = 1;
   repeated videre.type.ERC20Native cost = 2;
   // bidder signs hash of fields (1, 2, askDigest)
   bytes signature = 3;
@@ -42,7 +42,7 @@ message BidOptionItem {
 
 // an optional term is a term that comes with an additional cost
 message BidOptionTerm {
-  BidTerm term = 1;
+  required BidTerm term = 1;
   repeated videre.type.ERC20Native cost = 2;
   // bidder signs hash of fields (1, 2, askDigest)
   bytes signature = 3;
