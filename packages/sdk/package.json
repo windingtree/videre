@@ -1,6 +1,6 @@
 {
   "name": "@windingtree/videre-sdk",
-  "version": "0.4.6",
+  "version": "0.4.7",
   "description": "Videre Protocol SDK",
   "author": "mfw78 <mfw78@protonmail.com>",
   "license": "MIT",
@@ -16,10 +16,10 @@
   "types": "./dist/cjs/index.d.ts",
   "scripts": {
     "typechain": "typechain --target ethers-v5 --glob './node_modules/@windingtree/videre-contracts/artifacts/contracts/registries/ServiceProviderRegistry.sol/ServiceProviderRegistry.json' --out-dir ./src/typechain",
-    "protoc": "protoc --ts_out ./src/proto --proto_path ./src/proto ./src/proto/*.proto",
-    "proto:source": "rm -rf ./dist/proto && mkdir ./dist/proto && cp -R ./src/proto/*.proto ./dist/proto/",
+    "protoc:local": "protoc --ts_out ./src/proto --proto_path ./src/proto ./src/proto/*.proto",
+    "protoc:source": "rm -rf ./dist/proto && mkdir ./dist/proto && cp -R ./src/proto/*.proto ./dist/proto/",
     "tsc": "tsc -p tsconfig.json && tsc -p tsconfig-cjs.json",
-    "prepublish": "npm run typechain && npm run protoc && npm run tsc && npm run proto:source",
+    "prepublish": "npm run typechain && npm run protoc:local && npm run tsc && npm run protoc:source",
     "test": "mocha --loader=ts-node/esm --extension ts"
   },
   "files": [
