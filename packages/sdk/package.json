@@ -1,6 +1,6 @@
 {
   "name": "@windingtree/videre-sdk",
-  "version": "0.4.7",
+  "version": "0.5.0",
   "description": "Videre Protocol SDK",
   "author": "mfw78 <mfw78@protonmail.com>",
   "license": "MIT",
@@ -40,7 +40,7 @@
     "@types/node": "^17.0.33",
     "@typescript-eslint/eslint-plugin": "^5.22.0",
     "@typescript-eslint/parser": "^5.22.0",
-    "@windingtree/videre-contracts": "^0.1.6",
+    "@windingtree/videre-contracts": "^0.2.0-alpha.1",
     "chai": "^4.3.6",
     "chai-ethers": "^0.0.1",
     "eslint": "^8.15.0",
