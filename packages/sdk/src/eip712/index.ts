@@ -1,21 +1,13 @@
-import { ServiceProviderRegistry } from "../typechain"
-import { constants } from "../utils"
-import * as bidask from "./bidask"
-import * as date from "./date"
-import * as pingpong from "./pingpong"
-import * as storage from "./storage"
-import * as stub from "./stub"
-import * as timestamp from "./timestamp"
-import * as token from "./token"
-export {
-  bidask,
-  date,
-  pingpong,
-  storage,
-  stub,
-  timestamp,
-  token
-}
+import { ServiceProviderRegistry } from '../typechain';
+import { constants } from '../utils';
+import * as bidask from './bidask';
+import * as date from './date';
+import * as pingpong from './pingpong';
+import * as storage from './storage';
+import * as stub from './stub';
+import * as timestamp from './timestamp';
+import * as token from './token';
+export { bidask, date, pingpong, storage, stub, timestamp, token };
 
 /**
  * Check if a signatory is valid for a service provider
@@ -31,9 +23,9 @@ export async function validateSigner(
   who: string,
   registry: ServiceProviderRegistry
 ): Promise<boolean> {
-  const roles = constants.AccessRoles
+  const roles = constants.AccessRoles;
   if (role != roles.API_ROLE || role != roles.BIDDER_ROLE) {
-    return new Promise((resolve) => resolve(false) )
+    return new Promise((resolve) => resolve(false));
   } else {
     return await registry.can(which, constants.AccessRoles.BIDDER_ROLE, who);
   }

@@ -1,10 +1,13 @@
-import { Wallet, utils } from "ethers";
-import { TypedDataDomain, TypedDataField } from "@ethersproject/abstract-signer";
+import { Wallet, utils } from 'ethers';
+import {
+  TypedDataDomain,
+  TypedDataField
+} from '@ethersproject/abstract-signer';
 
 const log = console.log;
 
 export interface SignedMessage {
-  signature: Uint8Array
+  signature: Uint8Array;
 }
 
 /**
@@ -15,22 +18,18 @@ export interface SignedMessage {
  * @param signer of the signature
  * @returns a protobuf message with the signature placed as per callback
  */
- export async function createSignedMessage<T extends SignedMessage>(
+export async function createSignedMessage<T extends SignedMessage>(
   domain: TypedDataDomain,
   types: Record<string, TypedDataField[]>,
   msg: T,
   signer: Wallet
 ): Promise<T> {
-  try {
-    const values: Omit<T, "signature"> = msg
-    const signature = await signer._signTypedData(domain, types, values);
-    return {
-      ...msg,
-      signature: utils.arrayify(signature)
-    }
-  } catch(e) {
-    throw e
-  }
+  const values: Omit<T, 'signature'> = msg;
+  const signature = await signer._signTypedData(domain, types, values);
+  return {
+    ...msg,
+    signature: utils.arrayify(signature)
+  };
 }
 
 /**
@@ -42,8 +41,8 @@ export interface SignedMessage {
  * @param verifier callback function to assert truthfullness
  * @returns true if message is verified, false otherwise
  */
- export async function verifyMessage<T extends SignedMessage, U>(
-  which: U, 
+export async function verifyMessage<T extends SignedMessage, U>(
+  which: U,
   domain: TypedDataDomain,
   types: Record<string, TypedDataField[]>,
   msg: T,
@@ -51,13 +50,13 @@ export interface SignedMessage {
 ): Promise<boolean> {
   try {
     // get the values excluding the signature
-    const values: Omit<T, "signature"> = msg
+    const values: Omit<T, 'signature'> = msg;
     // get the signing key
-    const who = utils.verifyTypedData(domain, types, values, msg.signature)
+    const who = utils.verifyTypedData(domain, types, values, msg.signature);
     // now pass the signer and value to a function to verify
-    return verifier(which, who)
-  } catch(e) {
-    log(e)
-    return false
+    return verifier(which, who);
+  } catch (e) {
+    log(e);
+    return false;
   }
 }
