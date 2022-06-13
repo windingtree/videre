@@ -1,8 +1,10 @@
-import { Wallet, utils } from 'ethers';
+import { Wallet, utils, BigNumber } from 'ethers';
 import {
   TypedDataDomain,
   TypedDataField
 } from '@ethersproject/abstract-signer';
+import { eip712 } from '..';
+import { BidOptions, BidTerm } from '../proto/bidask';
 
 const log = console.log;
 
@@ -59,4 +61,51 @@ export async function verifyMessage<T extends SignedMessage, U>(
     log(e);
     return false;
   }
+}
+
+export async function createBidLine(
+  domain: TypedDataDomain,
+  wallet: Wallet,
+  salt: string,
+  which: string,
+  params: string,
+  items: string[],
+  terms: BidTerm[],
+  options: BidOptions,
+  limit: number,
+  expiry: number,
+  gem: string,
+  wad: BigNumber
+) {
+  return {
+    limit: limit,
+    expiry: expiry,
+    items: items,
+    terms: terms,
+    options: options,
+    cost: [
+      {
+        gem: gem,
+        wad: wad.toString()
+      }
+    ],
+    signature: utils.arrayify(
+      await wallet._signTypedData(domain, eip712.bidask.Bid, {
+        salt: salt,
+        limit: limit,
+        expiry: expiry,
+        which: which,
+        params: params,
+        items: items,
+        terms: terms,
+        options: options,
+        cost: [
+          {
+            gem: gem,
+            wad: wad
+          }
+        ]
+      })
+    )
+  };
 }
