@@ -1,5 +1,5 @@
 import { ServiceProviderRegistry } from '../typechain';
-import { constants } from '../utils';
+import { auth } from '../utils';
 import * as bidask from './bidask';
 import * as date from './date';
 import * as pingpong from './pingpong';
@@ -23,10 +23,10 @@ export async function validateSigner(
   who: string,
   registry: ServiceProviderRegistry
 ): Promise<boolean> {
-  const roles = constants.AccessRoles;
+  const roles = auth.AccessRoles;
   if (role != roles.API_ROLE || role != roles.BIDDER_ROLE) {
     return new Promise((resolve) => resolve(false));
   } else {
-    return await registry.can(which, constants.AccessRoles.BIDDER_ROLE, who);
+    return await registry.can(which, roles.BIDDER_ROLE, who);
   }
 }
