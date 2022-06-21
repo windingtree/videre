@@ -117,6 +117,30 @@ async function multiAgrees(
   return results;
 }
 
+/**
+ * Deterministically generate
+ * @param id of the service provider
+ * @param role to generate the key for
+ * @returns the role key used in AccessControl
+ */
+function genRoleKey(id: string, role: number) {
+  return utils.keccak256(
+    utils.defaultAbiCoder.encode(['bytes32', 'uint256'], [id, role])
+  );
+}
+
+/**
+ * Get the deterministic service provider id generated from the smart contract
+ * @param salt provided to `enroll()` smart contract function
+ * @param address the address used to `enroll()` the service provider
+ * @returns the deterministic id for the service provider
+ */
+function getServiceProviderId(salt: string, address: string): string {
+  return utils.keccak256(
+    utils.defaultAbiCoder.encode(['bytes32', 'address'], [salt, address])
+  );
+}
+
 export {
   AccessRoles,
   isBidder,
@@ -125,5 +149,7 @@ export {
   multiIsApi,
   multiIsBidder,
   agrees,
-  multiAgrees
+  multiAgrees,
+  getServiceProviderId,
+  genRoleKey
 };
