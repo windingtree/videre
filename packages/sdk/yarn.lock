@@ -588,10 +588,10 @@
   resolved "https://registry.npmjs.org/@ungap/promise-all-settled/-/promise-all-settled-1.1.2.tgz"
   integrity sha512-sL/cEvJWAnClXw0wHk85/2L0G6Sj8UB0Ctc1TEMbKSsmpRosqhwj9gWgFRZSrBr2f9tiXISwNhCPmlfqUqyb9Q==
 
-"@windingtree/videre-contracts@^0.2.0-alpha.1":
-  version "0.2.0-alpha.1"
-  resolved "https://registry.yarnpkg.com/@windingtree/videre-contracts/-/videre-contracts-0.2.0-alpha.1.tgz#94c2f5a350e775f9d0c82364c51a5f7c02808aea"
-  integrity sha512-51q0tgv2gzOyGNob8NhlTUZaSWMempNX2vN+IB3JDSnl8UqUFpvsZRMI1iji9IVzjFMA9ZfhiQ3RZD6rfb+6VQ==
+"@windingtree/videre-contracts@^2.0.0":
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/@windingtree/videre-contracts/-/videre-contracts-2.0.0.tgz#c8328681d830ebbed38c621afcd24f73ac9ff1c1"
+  integrity sha512-hMzMEaTQRl5N+J51gcJEtwZOAO3M1/ZGEtLtPdm/v8V1OutMHv3Aiqyvdx4zVpZWd4e+zj2pa4VCjI3Jte3Mbg==
   dependencies:
     "@openzeppelin/contracts" "^4.5.0"
 
