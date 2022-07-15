@@ -44,6 +44,7 @@ export const BidOptionTerm: Record<string, TypedDataField[]> = {
     { name: 'cost', type: 'ERC20Native[]' }
   ]
 };
+BidOptionTerm['BidTerm'] = BidTerm.BidTerm;
 BidOptionTerm['ERC20Native'] = ERC20Native.ERC20Native;
 
 export const BidOptions: Record<string, TypedDataField[]> = {
